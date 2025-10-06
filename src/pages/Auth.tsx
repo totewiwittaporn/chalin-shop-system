@@ -7,6 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -15,6 +24,8 @@ const Auth = () => {
   const defaultMode = searchParams.get("mode") === "register" ? "register" : "login";
   const [activeTab, setActiveTab] = useState(defaultMode);
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
 
   const [loginData, setLoginData] = useState({
     email: "",
@@ -66,6 +77,25 @@ const Auth = () => {
     
     if (!error) {
       navigate("/dashboard");
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/auth?mode=reset-password`,
+    });
+
+    setIsLoading(false);
+
+    if (error) {
+      toast.error("เกิดข้อผิดพลาด: " + error.message);
+    } else {
+      toast.success("ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลแล้ว");
+      setShowForgotPassword(false);
+      setResetEmail("");
     }
   };
 
@@ -138,6 +168,15 @@ const Auth = () => {
                   >
                     {isLoading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
                   </Button>
+
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="w-full text-sm text-muted-foreground"
+                    onClick={() => setShowForgotPassword(true)}
+                  >
+                    ลืมรหัสผ่าน?
+                  </Button>
                 </form>
               </TabsContent>
 
@@ -205,6 +244,43 @@ const Auth = () => {
           Professional Retail Management System
         </p>
       </div>
+
+      <AlertDialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>รีเซ็ตรหัสผ่าน</AlertDialogTitle>
+            <AlertDialogDescription>
+              กรุณากรอกอีเมลของคุณ เราจะส่งลิงก์สำหรับรีเซ็ตรหัสผ่านไปให้
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <form onSubmit={handleForgotPassword} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="reset-email">อีเมล</Label>
+              <Input
+                id="reset-email"
+                type="email"
+                placeholder="your@email.com"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowForgotPassword(false)}
+                className="flex-1"
+              >
+                ยกเลิก
+              </Button>
+              <Button type="submit" className="flex-1" disabled={isLoading}>
+                {isLoading ? "กำลังส่ง..." : "ส่งลิงก์"}
+              </Button>
+            </div>
+          </form>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

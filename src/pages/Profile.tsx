@@ -4,13 +4,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Mail, Phone, Shield } from "lucide-react";
+import { User, Mail, Phone, Shield, Lock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -18,9 +25,15 @@ const Profile = () => {
   const queryClient = useQueryClient();
   
   const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [formData, setFormData] = useState({
     full_name: "",
     phone: "",
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   const { data: profile, isLoading } = useQuery({
@@ -67,9 +80,61 @@ const Profile = () => {
     },
   });
 
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
+      // First verify current password
+      if (!user?.email) throw new Error("No user email");
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: data.currentPassword,
+      });
+
+      if (signInError) throw new Error("รหัสผ่านปัจจุบันไม่ถูกต้อง");
+
+      // Update password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: data.newPassword,
+      });
+
+      if (updateError) throw updateError;
+    },
+    onSuccess: () => {
+      toast.success("เปลี่ยนรหัสผ่านสำเร็จ");
+      setIsChangingPassword(false);
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    },
+    onError: (error: any) => {
+      toast.error("เกิดข้อผิดพลาด: " + error.message);
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateProfileMutation.mutate(formData);
+  };
+
+  const handlePasswordChange = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("รหัสผ่านใหม่ไม่ตรงกัน");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      toast.error("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+      return;
+    }
+
+    changePasswordMutation.mutate({
+      currentPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword,
+    });
   };
 
   const getRoleBadge = (role: string) => {
@@ -103,8 +168,8 @@ const Profile = () => {
           <p className="text-sm text-muted-foreground">จัดการข้อมูลส่วนตัวของคุณ</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
@@ -234,8 +299,98 @@ const Profile = () => {
               </div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5" />
+                ความปลอดภัย
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-muted-foreground">รหัสผ่าน</Label>
+                  <p className="text-sm mt-1">••••••••</p>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setIsChangingPassword(true)}
+                >
+                  เปลี่ยนรหัสผ่าน
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
+
+      <AlertDialog open={isChangingPassword} onOpenChange={setIsChangingPassword}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>เปลี่ยนรหัสผ่าน</AlertDialogTitle>
+            <AlertDialogDescription>
+              กรุณากรอกรหัสผ่านปัจจุบันและรหัสผ่านใหม่
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">รหัสผ่านปัจจุบัน</Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                value={passwordData.currentPassword}
+                onChange={(e) =>
+                  setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">รหัสผ่านใหม่</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                value={passwordData.newPassword}
+                onChange={(e) =>
+                  setPasswordData({ ...passwordData, newPassword: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">ยืนยันรหัสผ่านใหม่</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={passwordData.confirmPassword}
+                onChange={(e) =>
+                  setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsChangingPassword(false)}
+                className="flex-1"
+              >
+                ยกเลิก
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1"
+                disabled={changePasswordMutation.isPending}
+              >
+                {changePasswordMutation.isPending ? "กำลังบันทึก..." : "เปลี่ยนรหัสผ่าน"}
+              </Button>
+            </div>
+          </form>
+        </AlertDialogContent>
+      </AlertDialog>
     </MainLayout>
   );
 };
