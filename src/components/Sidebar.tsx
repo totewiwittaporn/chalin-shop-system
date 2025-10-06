@@ -1,4 +1,4 @@
-import { Home, Package, Layers, Building2, Warehouse, ShoppingCart, ArrowLeftRight, Receipt, FileText, FileBarChart, Settings, Users, LogOut, UserCircle } from "lucide-react";
+import { Home, Package, Layers, Building2, Warehouse, ShoppingCart, ArrowLeftRight, Receipt, FileText, FileBarChart, Settings, Users, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,13 +28,7 @@ const menuItems = [
 ];
 
 export function Sidebar({ activeItem = "/dashboard", onNavigate }: SidebarProps) {
-  const { signOut, user } = useAuth();
   const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate("/");
-  };
 
   return (
     <div className="flex h-full w-64 flex-col border-r border-border bg-sidebar">
@@ -63,21 +57,6 @@ export function Sidebar({ activeItem = "/dashboard", onNavigate }: SidebarProps)
               </Button>
             );
           })}
-
-          {/* Logout Menu Item */}
-          <div className="pt-4 mt-4 border-t border-border">
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-5 w-5" />
-              <div className="flex flex-col items-start">
-                <span className="text-sm font-medium">ออกจากระบบ</span>
-                <span className="text-xs">Logout</span>
-              </div>
-            </Button>
-          </div>
         </nav>
       </ScrollArea>
     </div>
