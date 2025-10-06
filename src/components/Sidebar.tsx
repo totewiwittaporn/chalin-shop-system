@@ -38,29 +38,6 @@ export function Sidebar({ activeItem = "/dashboard", onNavigate }: SidebarProps)
 
   return (
     <div className="flex h-full w-64 flex-col border-r border-border bg-sidebar">
-      {/* User Info Section */}
-      {user && (
-        <div className="px-4 py-4 border-b border-border">
-          <Button
-            variant="ghost"
-            className="w-full h-auto p-0 hover:bg-transparent"
-            onClick={() => onNavigate?.("/profile")}
-          >
-            <div className="flex items-center gap-3 w-full">
-              <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
-                <span className="text-sm font-semibold text-primary-foreground">
-                  {user.email?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-medium truncate">{user.email}</p>
-                <p className="text-xs text-muted-foreground">ผู้ใช้งาน</p>
-              </div>
-            </div>
-          </Button>
-        </div>
-      )}
-
       {/* Navigation Menu */}
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-1">
@@ -86,23 +63,23 @@ export function Sidebar({ activeItem = "/dashboard", onNavigate }: SidebarProps)
               </Button>
             );
           })}
+
+          {/* Logout Menu Item */}
+          <div className="pt-4 mt-4 border-t border-border">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-5 w-5" />
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-medium">ออกจากระบบ</span>
+                <span className="text-xs">Logout</span>
+              </div>
+            </Button>
+          </div>
         </nav>
       </ScrollArea>
-
-      {/* Logout Button */}
-      <div className="p-3 border-t border-border">
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-5 w-5" />
-          <div className="flex flex-col items-start">
-            <span className="text-sm font-medium">ออกจากระบบ</span>
-            <span className="text-xs">Logout</span>
-          </div>
-        </Button>
-      </div>
     </div>
   );
 }
