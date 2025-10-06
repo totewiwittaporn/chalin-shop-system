@@ -29,8 +29,19 @@ const Dashboard = () => {
   const isStaff = roles?.some((r: any) => r.role === "staff") ?? false;
   const isConsignmentOwner = roles?.some((r: any) => r.role === "consignment_owner") ?? false;
 
-  // Get user's branch name for consignment owners
-  const userBranch = roles?.find((r: any) => r.branch_id)?.branches;
+  // Get user's branches
+  const userBranches = roles?.filter((r: any) => r.branch_id && r.branches).map((r: any) => r.branches) || [];
+  const branchCount = userBranches.length;
+
+  // Determine display text
+  const getBranchDisplayText = () => {
+    if (isAdmin) return "แอดมิน / Admin";
+    if (isStaff && branchCount === 0) return "พนักงาน (ทุกสาขา) / Staff (All Branches)";
+    if (isStaff && branchCount === 1) return `${userBranches[0].name_th} / Staff`;
+    if (isStaff && branchCount > 1) return `${branchCount} สาขา / ${branchCount} Branches`;
+    if (isConsignmentOwner && branchCount > 0) return `${userBranches[0].name_th} / Consignment`;
+    return "ผู้ใช้งาน / User";
+  };
 
   const stats = [
     {
@@ -61,8 +72,8 @@ const Dashboard = () => {
       color: "text-accent",
     },
     {
-      title: isConsignmentOwner ? "สาขาของฉัน" : "สาขาทั้งหมด",
-      titleEn: isConsignmentOwner ? "My Branch" : "Total Branches",
+      title: isConsignmentOwner ? "สาขาของฉัน" : isStaff && branchCount > 0 ? "สาขาของฉัน" : "สาขาทั้งหมด",
+      titleEn: isConsignmentOwner || (isStaff && branchCount > 0) ? "My Branches" : "Total Branches",
       value: statsData ? statsData.branchCount.toString() : "0",
       change: "-",
       trend: "up",
@@ -80,11 +91,7 @@ const Dashboard = () => {
             <p className="text-sm text-muted-foreground">Overview</p>
           </div>
           <Badge variant="outline" className="px-3 py-1">
-            {isConsignmentOwner && userBranch
-              ? `${userBranch.name_th} / Consignment Branch`
-              : isAdmin
-              ? "แอดมิน / Admin"
-              : "พนักงาน / Staff"}
+            {getBranchDisplayText()}
           </Badge>
         </div>
         {/* Stats Grid */}

@@ -23,12 +23,18 @@ export const useDashboardStats = () => {
       const isStaff = roles.some((r: any) => r.role === "staff");
       const isConsignmentOwner = roles.some((r: any) => r.role === "consignment_owner");
       
-      // Get branch IDs for consignment owners
+      // Get branch IDs that user has access to (Staff and Consignment Owner)
       const userBranchIds = roles
         .filter((r: any) => r.branch_id)
         .map((r: any) => r.branch_id);
 
-      // Build query based on role
+      // Determine if user should see all branches (Admin or Staff without specific branches)
+      const hasStaffRoleWithoutBranch = roles.some(
+        (r: any) => r.role === "staff" && !r.branch_id
+      );
+      const canSeeAllBranches = isAdmin || hasStaffRoleWithoutBranch;
+
+      // Build query based on role and branch access
       let todaySalesQuery = supabase
         .from("sales")
         .select("total_amount")
@@ -56,8 +62,8 @@ export const useDashboardStats = () => {
       let stockQuery = supabase.from("branch_products").select("quantity");
       let branchQuery = supabase.from("branches").select("*", { count: "exact", head: true }).eq("is_active", true);
 
-      // Filter by branch for consignment owners
-      if (isConsignmentOwner && !isAdmin && userBranchIds.length > 0) {
+      // Filter by branch for non-admin users with specific branches
+      if (!canSeeAllBranches && userBranchIds.length > 0) {
         todaySalesQuery = todaySalesQuery.in("branch_id", userBranchIds);
         yesterdaySalesQuery = yesterdaySalesQuery.in("branch_id", userBranchIds);
         todayOrdersQuery = todayOrdersQuery.in("branch_id", userBranchIds);
@@ -121,6 +127,8 @@ export const useDashboardStats = () => {
         totalStock,
         branchCount: branchCount || 0,
         userRole: isAdmin ? "admin" : isStaff ? "staff" : "consignment_owner",
+        canSeeAllBranches,
+        userBranchCount: userBranchIds.length,
       };
     },
     enabled: !!user?.id && !!roles,
@@ -149,10 +157,16 @@ export const useRecentActivity = () => {
       const isStaff = roles.some((r: any) => r.role === "staff");
       const isConsignmentOwner = roles.some((r: any) => r.role === "consignment_owner");
 
-      // Get branch IDs for consignment owners
+      // Get branch IDs that user has access to
       const userBranchIds = roles
         .filter((r: any) => r.branch_id)
         .map((r: any) => r.branch_id);
+
+      // Check if user can see all branches
+      const hasStaffRoleWithoutBranch = roles.some(
+        (r: any) => r.role === "staff" && !r.branch_id
+      );
+      const canSeeAllBranches = isAdmin || hasStaffRoleWithoutBranch;
 
       // ยอดขายล่าสุด
       let salesQuery = supabase
@@ -167,7 +181,7 @@ export const useRecentActivity = () => {
         .order("created_at", { ascending: false })
         .limit(3);
 
-      if (isConsignmentOwner && !isAdmin && userBranchIds.length > 0) {
+      if (!canSeeAllBranches && userBranchIds.length > 0) {
         salesQuery = salesQuery.in("branch_id", userBranchIds);
       }
 
@@ -187,18 +201,27 @@ export const useRecentActivity = () => {
 
       // การโอนสินค้าล่าสุด (Admin และ Staff เท่านั้น)
       if (isAdmin || isStaff) {
-        const { data: recentTransfers, error: transfersError } = await supabase
+        let transfersQuery = supabase
           .from("transfers")
           .select(`
             id,
             created_at,
             status,
             to_branch:to_branch_id (name_th),
+            from_branch:from_branch_id (name_th),
             transfer_items (quantity)
           `)
           .order("created_at", { ascending: false })
           .limit(2);
 
+        // Staff with specific branches: filter by from_branch_id OR to_branch_id
+        if (!canSeeAllBranches && userBranchIds.length > 0) {
+          transfersQuery = transfersQuery.or(
+            `from_branch_id.in.(${userBranchIds.join(",")}),to_branch_id.in.(${userBranchIds.join(",")})`
+          );
+        }
+
+        const { data: recentTransfers, error: transfersError } = await transfersQuery;
         if (transfersError) throw transfersError;
 
         recentTransfers?.forEach((transfer: any) => {
@@ -209,7 +232,7 @@ export const useRecentActivity = () => {
 
           activities.push({
             type: "transfer",
-            description: `โอนสินค้าไป ${transfer.to_branch?.name_th || "สาขา"}`,
+            description: `โอนสินค้า ${transfer.from_branch?.name_th || "?"} → ${transfer.to_branch?.name_th || "?"}`,
             amount: `${totalQty} ชิ้น`,
             time: new Date(transfer.created_at),
             status: transfer.status === "COMPLETED" ? "completed" : "pending",
@@ -220,7 +243,7 @@ export const useRecentActivity = () => {
 
       // การซื้อสินค้าล่าสุด (Admin และ Staff เท่านั้น)
       if (isAdmin || isStaff) {
-        const { data: recentPurchases, error: purchasesError } = await supabase
+        let purchasesQuery = supabase
           .from("purchases")
           .select(`
             id,
@@ -232,6 +255,11 @@ export const useRecentActivity = () => {
           .order("created_at", { ascending: false })
           .limit(2);
 
+        if (!canSeeAllBranches && userBranchIds.length > 0) {
+          purchasesQuery = purchasesQuery.in("branch_id", userBranchIds);
+        }
+
+        const { data: recentPurchases, error: purchasesError } = await purchasesQuery;
         if (purchasesError) throw purchasesError;
 
         recentPurchases?.forEach((purchase: any) => {
