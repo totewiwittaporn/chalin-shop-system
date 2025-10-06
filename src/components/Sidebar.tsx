@@ -1,4 +1,4 @@
-import { Home, Package, Layers, Building2, Warehouse, ShoppingCart, ArrowLeftRight, Receipt, FileText, FileBarChart, Settings, Users, LogOut } from "lucide-react";
+import { Home, Package, Layers, Building2, Warehouse, ShoppingCart, ArrowLeftRight, Receipt, FileText, FileBarChart, Settings, Users, LogOut, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,6 +13,7 @@ interface SidebarProps {
 
 const menuItems = [
   { icon: Home, label: "แดชบอร์ด", labelEn: "Dashboard", path: "/dashboard" },
+  { icon: UserCircle, label: "โปรไฟล์", labelEn: "Profile", path: "/profile" },
   { icon: Package, label: "สินค้า", labelEn: "Products", path: "/products" },
   { icon: Layers, label: "ประเภทสินค้า", labelEn: "Product Types", path: "/product-types" },
   { icon: Building2, label: "สาขา & ร้านฝาก", labelEn: "Branches & Consignment", path: "/branches" },
@@ -40,17 +41,23 @@ export function Sidebar({ activeItem = "/dashboard", onNavigate }: SidebarProps)
       {/* User Info Section */}
       {user && (
         <div className="px-4 py-4 border-b border-border">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
-              <span className="text-sm font-semibold text-primary-foreground">
-                {user.email?.charAt(0).toUpperCase()}
-              </span>
+          <Button
+            variant="ghost"
+            className="w-full h-auto p-0 hover:bg-transparent"
+            onClick={() => onNavigate?.("/profile")}
+          >
+            <div className="flex items-center gap-3 w-full">
+              <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
+                <span className="text-sm font-semibold text-primary-foreground">
+                  {user.email?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-medium truncate">{user.email}</p>
+                <p className="text-xs text-muted-foreground">ผู้ใช้งาน</p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user.email}</p>
-              <p className="text-xs text-muted-foreground">ผู้ใช้งาน</p>
-            </div>
-          </div>
+          </Button>
         </div>
       )}
 

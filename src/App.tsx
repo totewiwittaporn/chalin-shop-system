@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
 import Products from "./pages/Products";
 import ProductTypes from "./pages/ProductTypes";
 import Branches from "./pages/Branches";
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
           <Route path="/product-types" element={<ProtectedRoute><ProductTypes /></ProtectedRoute>} />
           <Route path="/branches" element={<ProtectedRoute><Branches /></ProtectedRoute>} />
