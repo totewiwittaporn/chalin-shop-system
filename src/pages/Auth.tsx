@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,12 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, ArrowLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { toast } = useToast();
+  const { user, signIn, signUp } = useAuth();
   const defaultMode = searchParams.get("mode") === "register" ? "register" : "login";
   const [activeTab, setActiveTab] = useState(defaultMode);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,47 +25,48 @@ const Auth = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    fullName: "",
   });
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulated login - replace with actual Supabase auth
-    setTimeout(() => {
-      toast({
-        title: "เข้าสู่ระบบสำเร็จ",
-        description: "Welcome back! กำลังเข้าสู่แดชบอร์ด...",
-      });
-      setIsLoading(false);
+    const { error } = await signIn(loginData.email, loginData.password);
+    
+    setIsLoading(false);
+    
+    if (!error) {
       navigate("/dashboard");
-    }, 1000);
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (registerData.password !== registerData.confirmPassword) {
-      toast({
-        title: "ข้อผิดพลาด",
-        description: "รหัสผ่านไม่ตรงกัน",
-        variant: "destructive",
-      });
+      return;
+    }
+
+    if (registerData.password.length < 6) {
       return;
     }
 
     setIsLoading(true);
 
-    // Simulated registration - replace with actual Supabase auth
-    setTimeout(() => {
-      toast({
-        title: "สมัครสมาชิกสำเร็จ",
-        description: "กำลังเข้าสู่ระบบ...",
-      });
-      setIsLoading(false);
+    const { error } = await signUp(registerData.email, registerData.password);
+    
+    setIsLoading(false);
+    
+    if (!error) {
       navigate("/dashboard");
-    }, 1000);
+    }
   };
 
   return (
@@ -142,20 +143,6 @@ const Auth = () => {
 
               <TabsContent value="register">
                 <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="register-name">ชื่อ-นามสกุล / Full Name</Label>
-                    <Input
-                      id="register-name"
-                      type="text"
-                      placeholder="John Doe"
-                      value={registerData.fullName}
-                      onChange={(e) =>
-                        setRegisterData({ ...registerData, fullName: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="register-email">อีเมล / Email</Label>
                     <Input

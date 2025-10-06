@@ -1,7 +1,10 @@
-import { Home, Package, Layers, Building2, Warehouse, ShoppingCart, ArrowLeftRight, Receipt, FileText, FileBarChart, Settings, Users } from "lucide-react";
+import { Home, Package, Layers, Building2, Warehouse, ShoppingCart, ArrowLeftRight, Receipt, FileText, FileBarChart, Settings, Users, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface SidebarProps {
   activeItem?: string;
@@ -24,8 +27,33 @@ const menuItems = [
 ];
 
 export function Sidebar({ activeItem = "/dashboard", onNavigate }: SidebarProps) {
+  const { signOut, user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
+  };
+
   return (
     <div className="flex h-full w-64 flex-col border-r border-border bg-sidebar">
+      {/* User Info Section */}
+      {user && (
+        <div className="px-4 py-4 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
+              <span className="text-sm font-semibold text-primary-foreground">
+                {user.email?.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{user.email}</p>
+              <p className="text-xs text-muted-foreground">ผู้ใช้งาน</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Navigation Menu */}
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-1">
@@ -53,6 +81,21 @@ export function Sidebar({ activeItem = "/dashboard", onNavigate }: SidebarProps)
           })}
         </nav>
       </ScrollArea>
+
+      {/* Logout Button */}
+      <div className="p-3 border-t border-border">
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-5 w-5" />
+          <div className="flex flex-col items-start">
+            <span className="text-sm font-medium">ออกจากระบบ</span>
+            <span className="text-xs">Logout</span>
+          </div>
+        </Button>
+      </div>
     </div>
   );
 }
