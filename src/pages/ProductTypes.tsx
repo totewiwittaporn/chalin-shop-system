@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/Sidebar";
+import { MainLayout } from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,9 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Layers, Plus, Search, Edit, Trash2 } from "lucide-react";
 
 const ProductTypes = () => {
-  const handleNavigate = (path: string) => {
-    window.location.href = path;
-  };
 
   const types = [
     { id: 1, code: "HP", name: "กิ๊บติดผม", nameEn: "Hair Clips", productCount: 45, description: "เครื่องประดับติดผม" },
@@ -18,26 +15,18 @@ const ProductTypes = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar activeItem="/product-types" onNavigate={handleNavigate} />
-
-      <div className="flex-1 overflow-auto">
-        <header className="border-b border-border bg-card">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">ประเภทสินค้า / Product Types</h1>
-                <p className="text-sm text-muted-foreground">จัดการหมวดหมู่สินค้า</p>
-              </div>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                เพิ่มประเภทใหม่
-              </Button>
-            </div>
+    <MainLayout>
+      <div className="px-6 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">ประเภทสินค้า / Product Types</h2>
+            <p className="text-sm text-muted-foreground">จัดการหมวดหมู่สินค้า</p>
           </div>
-        </header>
-
-        <main className="px-6 py-8">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            เพิ่มประเภทใหม่
+          </Button>
+        </div>
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -85,9 +74,8 @@ const ProductTypes = () => {
               </div>
             </CardContent>
           </Card>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

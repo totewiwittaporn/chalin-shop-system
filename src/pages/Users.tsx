@@ -1,13 +1,10 @@
-import { Sidebar } from "@/components/Sidebar";
+import { MainLayout } from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users as UsersIcon, Plus, Edit, Trash2 } from "lucide-react";
 
 const Users = () => {
-  const handleNavigate = (path: string) => {
-    window.location.href = path;
-  };
 
   const users = [
     { id: 1, name: "Admin User", email: "admin@chalin.com", role: "ADMIN", branch: "ทั้งหมด", status: "active" },
@@ -30,26 +27,18 @@ const Users = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar activeItem="/users" onNavigate={handleNavigate} />
-
-      <div className="flex-1 overflow-auto">
-        <header className="border-b border-border bg-card">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">ผู้ใช้งาน / Users</h1>
-                <p className="text-sm text-muted-foreground">จัดการบัญชีผู้ใช้และสิทธิ์การเข้าถึง</p>
-              </div>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                เพิ่มผู้ใช้งาน
-              </Button>
-            </div>
+    <MainLayout>
+      <div className="px-6 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">ผู้ใช้งาน / Users</h2>
+            <p className="text-sm text-muted-foreground">จัดการบัญชีผู้ใช้และสิทธิ์การเข้าถึง</p>
           </div>
-        </header>
-
-        <main className="px-6 py-8">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            เพิ่มผู้ใช้งาน
+          </Button>
+        </div>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -97,9 +86,8 @@ const Users = () => {
               </div>
             </CardContent>
           </Card>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

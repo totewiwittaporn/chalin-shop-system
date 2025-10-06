@@ -1,13 +1,10 @@
-import { Sidebar } from "@/components/Sidebar";
+import { MainLayout } from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Receipt, Plus, FileText } from "lucide-react";
 
 const Sales = () => {
-  const handleNavigate = (path: string) => {
-    window.location.href = path;
-  };
 
   const sales = [
     { id: 1, docNo: "INV-JW-202501-045", date: "2025-01-06 14:35", branch: "J Avenue", customer: "ลูกค้าทั่วไป", amount: "฿2,450", status: "PAID" },
@@ -16,26 +13,18 @@ const Sales = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar activeItem="/sales" onNavigate={handleNavigate} />
-
-      <div className="flex-1 overflow-auto">
-        <header className="border-b border-border bg-card">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">ขายสินค้า / Sales</h1>
-                <p className="text-sm text-muted-foreground">บันทึกการขายและออกใบเสร็จ</p>
-              </div>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                บันทึกการขายใหม่
-              </Button>
-            </div>
+    <MainLayout>
+      <div className="px-6 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">ขายสินค้า / Sales</h2>
+            <p className="text-sm text-muted-foreground">บันทึกการขายและออกใบเสร็จ</p>
           </div>
-        </header>
-
-        <main className="px-6 py-8">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            บันทึกการขายใหม่
+          </Button>
+        </div>
           <div className="grid md:grid-cols-3 gap-4 mb-6">
             <Card>
               <CardContent className="pt-6">
@@ -106,9 +95,8 @@ const Sales = () => {
               </div>
             </CardContent>
           </Card>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

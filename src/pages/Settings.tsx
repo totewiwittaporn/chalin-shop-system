@@ -1,31 +1,19 @@
-import { Sidebar } from "@/components/Sidebar";
+import { MainLayout } from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings as SettingsIcon, Building2, FileText, Palette, Bell } from "lucide-react";
+import { Building2, FileText, Palette, Bell } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Settings = () => {
-  const handleNavigate = (path: string) => {
-    window.location.href = path;
-  };
-
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar activeItem="/settings" onNavigate={handleNavigate} />
-
-      <div className="flex-1 overflow-auto">
-        <header className="border-b border-border bg-card">
-          <div className="px-6 py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">ตั้งค่าระบบ / Settings</h1>
-              <p className="text-sm text-muted-foreground">กำหนดค่าและปรับแต่งระบบ</p>
-            </div>
-          </div>
-        </header>
-
-        <main className="px-6 py-8">
+    <MainLayout>
+      <div className="px-6 py-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-foreground">ตั้งค่าระบบ / Settings</h2>
+          <p className="text-sm text-muted-foreground">กำหนดค่าและปรับแต่งระบบ</p>
+        </div>
           <Tabs defaultValue="company" className="w-full">
             <TabsList className="grid w-full grid-cols-4 mb-6">
               <TabsTrigger value="company">ข้อมูลบริษัท</TabsTrigger>
@@ -189,9 +177,8 @@ const Settings = () => {
               </Card>
             </TabsContent>
           </Tabs>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

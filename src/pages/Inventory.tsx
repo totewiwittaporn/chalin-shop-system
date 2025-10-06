@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/Sidebar";
+import { MainLayout } from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,9 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Warehouse, Search, Package, TrendingDown, TrendingUp } from "lucide-react";
 
 const Inventory = () => {
-  const handleNavigate = (path: string) => {
-    window.location.href = path;
-  };
 
   const inventory = [
     { id: 1, sku: "HP-001", product: "กิ๊บติดผมเล็ก", branch: "สาขาหลัก", qty: 156, minStock: 50, status: "sufficient" },
@@ -28,26 +25,18 @@ const Inventory = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar activeItem="/inventory" onNavigate={handleNavigate} />
-
-      <div className="flex-1 overflow-auto">
-        <header className="border-b border-border bg-card">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">คลังสินค้า / Inventory</h1>
-                <p className="text-sm text-muted-foreground">ตรวจสอบและจัดการสต็อกสินค้า</p>
-              </div>
-              <Button className="gap-2">
-                <Package className="h-4 w-4" />
-                ปรับปรุงสต็อก
-              </Button>
-            </div>
+    <MainLayout>
+      <div className="px-6 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">คลังสินค้า / Inventory</h2>
+            <p className="text-sm text-muted-foreground">ตรวจสอบและจัดการสต็อกสินค้า</p>
           </div>
-        </header>
-
-        <main className="px-6 py-8">
+          <Button className="gap-2">
+            <Package className="h-4 w-4" />
+            ปรับปรุงสต็อก
+          </Button>
+        </div>
           <div className="grid md:grid-cols-4 gap-4 mb-6">
             <Card>
               <CardContent className="pt-6">
@@ -119,9 +108,8 @@ const Inventory = () => {
               </div>
             </CardContent>
           </Card>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

@@ -1,13 +1,10 @@
-import { Sidebar } from "@/components/Sidebar";
+import { MainLayout } from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, MapPin, Phone, Mail } from "lucide-react";
+import { Building2, Plus, MapPin, Phone } from "lucide-react";
 
 const Branches = () => {
-  const handleNavigate = (path: string) => {
-    window.location.href = path;
-  };
 
   const branches = [
     { id: 1, code: "MAIN", name: "Chalin Shop (สาขาหลัก)", type: "MAIN", address: "123 ถนนสุขุมวิท กรุงเทพฯ", phone: "02-123-4567", status: "active" },
@@ -35,26 +32,18 @@ const Branches = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar activeItem="/branches" onNavigate={handleNavigate} />
-
-      <div className="flex-1 overflow-auto">
-        <header className="border-b border-border bg-card">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">สาขา & ร้านฝาก / Branches</h1>
-                <p className="text-sm text-muted-foreground">จัดการสาขาและร้านฝากขาย</p>
-              </div>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                เพิ่มสาขาใหม่
-              </Button>
-            </div>
+    <MainLayout>
+      <div className="px-6 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">สาขา & ร้านฝาก / Branches</h2>
+            <p className="text-sm text-muted-foreground">จัดการสาขาและร้านฝากขาย</p>
           </div>
-        </header>
-
-        <main className="px-6 py-8">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            เพิ่มสาขาใหม่
+          </Button>
+        </div>
           <div className="grid md:grid-cols-2 gap-6">
             {branches.map((branch) => (
               <Card key={branch.id} className="hover:shadow-lg transition-shadow">
@@ -95,9 +84,8 @@ const Branches = () => {
               </Card>
             ))}
           </div>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

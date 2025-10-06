@@ -1,13 +1,10 @@
-import { Sidebar } from "@/components/Sidebar";
+import { MainLayout } from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeftRight, Plus, FileText } from "lucide-react";
 
 const Transfers = () => {
-  const handleNavigate = (path: string) => {
-    window.location.href = path;
-  };
 
   const transfers = [
     { id: 1, docNo: "TRF-202501-001", date: "2025-01-06", from: "สาขาหลัก", to: "J Avenue", items: 45, status: "COMPLETED" },
@@ -29,26 +26,18 @@ const Transfers = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar activeItem="/transfers" onNavigate={handleNavigate} />
-
-      <div className="flex-1 overflow-auto">
-        <header className="border-b border-border bg-card">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">โอนสินค้า / Transfers</h1>
-                <p className="text-sm text-muted-foreground">โอนสินค้าระหว่างสาขา</p>
-              </div>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                สร้างใบโอนสินค้า
-              </Button>
-            </div>
+    <MainLayout>
+      <div className="px-6 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">โอนสินค้า / Transfers</h2>
+            <p className="text-sm text-muted-foreground">โอนสินค้าระหว่างสาขา</p>
           </div>
-        </header>
-
-        <main className="px-6 py-8">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            สร้างใบโอนสินค้า
+          </Button>
+        </div>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -98,9 +87,8 @@ const Transfers = () => {
               </div>
             </CardContent>
           </Card>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

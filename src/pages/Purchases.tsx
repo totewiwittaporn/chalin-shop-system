@@ -1,14 +1,10 @@
-import { Sidebar } from "@/components/Sidebar";
+import { MainLayout } from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Plus, FileText } from "lucide-react";
 
 const Purchases = () => {
-  const handleNavigate = (path: string) => {
-    window.location.href = path;
-  };
-
   const purchases = [
     { id: 1, docNo: "PO-MAIN-202501-001", date: "2025-01-05", supplier: "ABC Jewelry Co.", amount: "฿45,000", status: "RECEIVED" },
     { id: 2, docNo: "PO-MAIN-202501-002", date: "2025-01-06", supplier: "XYZ Accessories", amount: "฿28,500", status: "PENDING" },
@@ -29,26 +25,18 @@ const Purchases = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar activeItem="/purchases" onNavigate={handleNavigate} />
-
-      <div className="flex-1 overflow-auto">
-        <header className="border-b border-border bg-card">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">ซื้อสินค้า / Purchases</h1>
-                <p className="text-sm text-muted-foreground">บันทึกการสั่งซื้อและรับสินค้า</p>
-              </div>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                สร้างใบสั่งซื้อ
-              </Button>
-            </div>
+    <MainLayout>
+      <div className="px-6 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">ซื้อสินค้า / Purchases</h2>
+            <p className="text-sm text-muted-foreground">บันทึกการสั่งซื้อและรับสินค้า</p>
           </div>
-        </header>
-
-        <main className="px-6 py-8">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            สร้างใบสั่งซื้อ
+          </Button>
+        </div>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -96,9 +84,8 @@ const Purchases = () => {
               </div>
             </CardContent>
           </Card>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

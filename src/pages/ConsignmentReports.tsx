@@ -1,13 +1,10 @@
-import { Sidebar } from "@/components/Sidebar";
+import { MainLayout } from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FileBarChart, Download, Eye } from "lucide-react";
 
 const ConsignmentReports = () => {
-  const handleNavigate = (path: string) => {
-    window.location.href = path;
-  };
 
   const reports = [
     { id: 1, shop: "The Sand Khao Lak", period: "ม.ค. 2025", sent: 150, sold: 89, remaining: 61, revenue: "฿48,560", status: "active" },
@@ -27,26 +24,18 @@ const ConsignmentReports = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar activeItem="/consignment-reports" onNavigate={handleNavigate} />
-
-      <div className="flex-1 overflow-auto">
-        <header className="border-b border-border bg-card">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">รายงานฝากขาย / Consignment Reports</h1>
-                <p className="text-sm text-muted-foreground">สรุปยอดขายและสต็อกร้านฝาก</p>
-              </div>
-              <Button className="gap-2">
-                <Download className="h-4 w-4" />
-                ส่งออกรายงาน
-              </Button>
-            </div>
+    <MainLayout>
+      <div className="px-6 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">รายงานฝากขาย / Consignment Reports</h2>
+            <p className="text-sm text-muted-foreground">สรุปยอดขายและสต็อกร้านฝาก</p>
           </div>
-        </header>
-
-        <main className="px-6 py-8">
+          <Button className="gap-2">
+            <Download className="h-4 w-4" />
+            ส่งออกรายงาน
+          </Button>
+        </div>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -96,9 +85,8 @@ const ConsignmentReports = () => {
               </div>
             </CardContent>
           </Card>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

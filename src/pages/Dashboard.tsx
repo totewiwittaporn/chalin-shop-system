@@ -1,7 +1,7 @@
+import { MainLayout } from "@/components/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Sidebar } from "@/components/Sidebar";
 import {
   Package,
   TrendingUp,
@@ -83,31 +83,17 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-background via-background to-muted">
-      {/* Sidebar */}
-      <Sidebar activeItem="/dashboard" onNavigate={handleNavigate} />
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        {/* Header */}
-        <div className="border-b border-border bg-card/50 backdrop-blur">
-          <div className="px-6 py-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold mb-2">แดชบอร์ด</h1>
-                <p className="text-muted-foreground">Dashboard - Overview</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="px-3 py-1">
-                  สาขาหลัก / Main Branch
-                </Badge>
-                <Button variant="outline">ตั้งค่า</Button>
-              </div>
-            </div>
+    <MainLayout>
+      <div className="px-6 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">ภาพรวม</h2>
+            <p className="text-sm text-muted-foreground">Overview</p>
           </div>
+          <Badge variant="outline" className="px-3 py-1">
+            สาขาหลัก / Main Branch
+          </Badge>
         </div>
-
-        <div className="px-6 py-8">
         {/* Stats Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
@@ -238,9 +224,8 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
-        </div>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

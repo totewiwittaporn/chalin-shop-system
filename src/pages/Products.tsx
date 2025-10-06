@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/Sidebar";
+import { MainLayout } from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,9 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Package, Plus, Search, Edit, Trash2 } from "lucide-react";
 
 const Products = () => {
-  const handleNavigate = (path: string) => {
-    window.location.href = path;
-  };
 
   const products = [
     { id: 1, sku: "HP-001", name: "กิ๊บติดผมเล็ก", nameEn: "Small Hair Clip", type: "กิ๊บติดผม", price: "฿45.00", stock: 156 },
@@ -17,26 +14,18 @@ const Products = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar activeItem="/products" onNavigate={handleNavigate} />
-
-      <div className="flex-1 overflow-auto">
-        <header className="border-b border-border bg-card">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">สินค้า / Products</h1>
-                <p className="text-sm text-muted-foreground">จัดการข้อมูลสินค้าทั้งหมด</p>
-              </div>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                เพิ่มสินค้าใหม่
-              </Button>
-            </div>
+    <MainLayout>
+      <div className="px-6 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">สินค้า / Products</h2>
+            <p className="text-sm text-muted-foreground">จัดการข้อมูลสินค้าทั้งหมด</p>
           </div>
-        </header>
-
-        <main className="px-6 py-8">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            เพิ่มสินค้าใหม่
+          </Button>
+        </div>
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -101,9 +90,8 @@ const Products = () => {
               </div>
             </CardContent>
           </Card>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 
