@@ -14,6 +14,7 @@ import {
   ArrowDownRight,
 } from "lucide-react";
 import { useDashboardStats, useRecentActivity } from "@/hooks/useDashboard";
+import { useUserRole } from "@/hooks/useUserRole";
 import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +23,14 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { data: statsData, isLoading: statsLoading } = useDashboardStats();
   const { data: activities, isLoading: activitiesLoading } = useRecentActivity();
+  const { data: roles } = useUserRole();
+
+  const isAdmin = roles?.some((r: any) => r.role === "admin") ?? false;
+  const isStaff = roles?.some((r: any) => r.role === "staff") ?? false;
+  const isConsignmentOwner = roles?.some((r: any) => r.role === "consignment_owner") ?? false;
+
+  // Get user's branch name for consignment owners
+  const userBranch = roles?.find((r: any) => r.branch_id)?.branches;
 
   const stats = [
     {
@@ -52,8 +61,8 @@ const Dashboard = () => {
       color: "text-accent",
     },
     {
-      title: "สาขาทั้งหมด",
-      titleEn: "Total Branches",
+      title: isConsignmentOwner ? "สาขาของฉัน" : "สาขาทั้งหมด",
+      titleEn: isConsignmentOwner ? "My Branch" : "Total Branches",
       value: statsData ? statsData.branchCount.toString() : "0",
       change: "-",
       trend: "up",
@@ -71,7 +80,11 @@ const Dashboard = () => {
             <p className="text-sm text-muted-foreground">Overview</p>
           </div>
           <Badge variant="outline" className="px-3 py-1">
-            สาขาหลัก / Main Branch
+            {isConsignmentOwner && userBranch
+              ? `${userBranch.name_th} / Consignment Branch`
+              : isAdmin
+              ? "แอดมิน / Admin"
+              : "พนักงาน / Staff"}
           </Badge>
         </div>
         {/* Stats Grid */}
@@ -211,37 +224,41 @@ const Dashboard = () => {
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 บันทึกการขาย / New Sale
               </Button>
+              {(isAdmin || isStaff) && (
+                <>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => navigate("/products")}
+                  >
+                    <Package className="w-4 h-4 mr-2" />
+                    เพิ่มสินค้า / Add Product
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => navigate("/transfers")}
+                  >
+                    <Warehouse className="w-4 h-4 mr-2" />
+                    โอนสินค้า / Transfer
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => navigate("/quotations")}
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    ใบเสนอราคา / Quotation
+                  </Button>
+                </>
+              )}
               <Button
                 variant="outline"
                 className="w-full justify-start"
-                onClick={() => navigate("/products")}
-              >
-                <Package className="w-4 h-4 mr-2" />
-                เพิ่มสินค้า / Add Product
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => navigate("/transfers")}
-              >
-                <Warehouse className="w-4 h-4 mr-2" />
-                โอนสินค้า / Transfer
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => navigate("/quotations")}
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                ใบเสนอราคา / Quotation
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => navigate("/consignment-reports")}
+                onClick={() => navigate(isConsignmentOwner ? "/consignment-reports" : "/dashboard")}
               >
                 <TrendingUp className="w-4 h-4 mr-2" />
-                รายงาน / Reports
+                {isConsignmentOwner ? "รายงานของฉัน / My Reports" : "รายงาน / Reports"}
               </Button>
             </CardContent>
           </Card>
