@@ -1,4 +1,4 @@
-import { Home, Package, Layers, Building2, Warehouse, ShoppingCart, ArrowLeftRight, Receipt, FileText, FileBarChart, Settings, Users, LogOut } from "lucide-react";
+import { Home, Package, Layers, Building2, Warehouse, ShoppingCart, ArrowLeftRight, Receipt, FileText, FileBarChart, Settings, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,22 +24,8 @@ const menuItems = [
 ];
 
 export function Sidebar({ activeItem = "/dashboard", onNavigate }: SidebarProps) {
-  const handleLogout = () => {
-    // TODO: Implement logout logic
-    window.location.href = "/auth";
-  };
-
   return (
-    <div className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
-      {/* Logo & Brand */}
-      <div className="flex h-16 items-center gap-2 border-b border-border px-6">
-        <Package className="h-6 w-6 text-primary" />
-        <div>
-          <h1 className="text-lg font-bold text-sidebar-foreground">Chalin Shop</h1>
-          <p className="text-xs text-muted-foreground">Inventory System</p>
-        </div>
-      </div>
-
+    <div className="flex h-full w-64 flex-col border-r border-border bg-sidebar">
       {/* Navigation Menu */}
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-1">
@@ -67,27 +53,6 @@ export function Sidebar({ activeItem = "/dashboard", onNavigate }: SidebarProps)
           })}
         </nav>
       </ScrollArea>
-
-      {/* User Section */}
-      <div className="border-t border-border p-4">
-        <div className="mb-2 flex items-center gap-3 px-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <Users className="h-4 w-4" />
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <p className="text-sm font-medium text-sidebar-foreground truncate">Admin User</p>
-            <p className="text-xs text-muted-foreground">แอดมิน</p>
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-2"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-4 w-4" />
-          <span>ออกจากระบบ / Logout</span>
-        </Button>
-      </div>
     </div>
   );
 }
