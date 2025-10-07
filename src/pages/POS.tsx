@@ -11,6 +11,18 @@ import { useBranches } from "@/hooks/useBranches";
 import { useProducts } from "@/hooks/useProducts";
 import { useSales } from "@/hooks/useSales";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const barcodeSchema = z.string()
+  .trim()
+  .min(1, { message: "กรุณากรอก barcode" })
+  .max(50, { message: "Barcode ต้องไม่เกิน 50 ตัวอักษร" })
+  .regex(/^[a-zA-Z0-9\-_]+$/, { message: "Barcode มีรูปแบบไม่ถูกต้อง" });
+
+const customerNameSchema = z.string()
+  .trim()
+  .max(255, { message: "ชื่อลูกค้าต้องไม่เกิน 255 ตัวอักษร" })
+  .optional();
 
 interface CartItem {
   product_id: string;
@@ -44,7 +56,17 @@ const POS = () => {
   }, [cart]);
 
   const handleBarcodeSubmit = (barcode: string) => {
-    const product = products?.find(p => p.barcode === barcode);
+    const validation = barcodeSchema.safeParse(barcode);
+    if (!validation.success) {
+      toast({
+        title: "Barcode ไม่ถูกต้อง",
+        description: validation.error.errors[0].message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const product = products?.find(p => p.barcode === validation.data);
     
     if (product) {
       addToCart(product.id, product.name_th, product.sku, product.base_price);
@@ -52,7 +74,7 @@ const POS = () => {
     } else {
       toast({
         title: "ไม่พบสินค้า",
-        description: `ไม่พบสินค้าที่มี barcode: ${barcode}`,
+        description: `ไม่พบสินค้าที่มี barcode: ${validation.data}`,
         variant: "destructive",
       });
     }
@@ -88,6 +110,14 @@ const POS = () => {
       removeFromCart(productId);
       return;
     }
+    if (quantity > 99999) {
+      toast({
+        title: "จำนวนเกินกำหนด",
+        description: "จำนวนต้องไม่เกิน 99,999",
+        variant: "destructive",
+      });
+      return;
+    }
     setCart(prev =>
       prev.map(item =>
         item.product_id === productId ? { ...item, quantity } : item
@@ -120,11 +150,24 @@ const POS = () => {
       return;
     }
 
+    // Validate customer name if provided
+    if (customerName) {
+      const validation = customerNameSchema.safeParse(customerName);
+      if (!validation.success) {
+        toast({
+          title: "ชื่อลูกค้าไม่ถูกต้อง",
+          description: validation.error.errors[0].message,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setIsProcessing(true);
     try {
       await createSale({
         branch_id: branchId,
-        customer_name: customerName || undefined,
+        customer_name: customerName.trim() || undefined,
         sale_date: new Date(),
         discount: 0,
         tax: 0,
@@ -262,6 +305,7 @@ const POS = () => {
                             }
                             className="w-16 text-center text-sm"
                             min="1"
+                            max="99999"
                           />
                           <span className="w-20 text-right font-medium text-sm md:text-base">
                             ฿{(item.quantity * item.unit_price).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
@@ -313,6 +357,7 @@ const POS = () => {
                     placeholder="ชื่อลูกค้า..."
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
+                    maxLength={255}
                   />
                 </div>
 

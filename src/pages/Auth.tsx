@@ -9,6 +9,7 @@ import { Package, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { z } from "zod";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -16,6 +17,39 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+const loginSchema = z.object({
+  email: z.string()
+    .trim()
+    .email({ message: "กรุณากรอกอีเมลที่ถูกต้อง" })
+    .max(255, { message: "อีเมลต้องไม่เกิน 255 ตัวอักษร" }),
+  password: z.string()
+    .min(1, { message: "กรุณากรอกรหัสผ่าน" }),
+});
+
+const registerSchema = z.object({
+  email: z.string()
+    .trim()
+    .email({ message: "กรุณากรอกอีเมลที่ถูกต้อง" })
+    .max(255, { message: "อีเมลต้องไม่เกิน 255 ตัวอักษร" }),
+  password: z.string()
+    .min(8, { message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" })
+    .max(72, { message: "รหัสผ่านต้องไม่เกิน 72 ตัวอักษร" })
+    .regex(/[A-Z]/, { message: "รหัสผ่านต้องมีตัวพิมพ์ใหญ่อย่างน้อย 1 ตัว" })
+    .regex(/[a-z]/, { message: "รหัสผ่านต้องมีตัวพิมพ์เล็กอย่างน้อย 1 ตัว" })
+    .regex(/[0-9]/, { message: "รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว" }),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "รหัสผ่านไม่ตรงกัน",
+  path: ["confirmPassword"],
+});
+
+const resetEmailSchema = z.object({
+  email: z.string()
+    .trim()
+    .email({ message: "กรุณากรอกอีเมลที่ถูกต้อง" })
+    .max(255, { message: "อีเมลต้องไม่เกิน 255 ตัวอักษร" }),
+});
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -47,10 +81,15 @@ const Auth = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    const { error } = await signIn(loginData.email, loginData.password);
     
+    const validation = loginSchema.safeParse(loginData);
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await signIn(loginData.email.trim(), loginData.password);
     setIsLoading(false);
     
     if (!error) {
@@ -61,18 +100,14 @@ const Auth = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (registerData.password !== registerData.confirmPassword) {
-      return;
-    }
-
-    if (registerData.password.length < 6) {
+    const validation = registerSchema.safeParse(registerData);
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
       return;
     }
 
     setIsLoading(true);
-
-    const { error } = await signUp(registerData.email, registerData.password);
-    
+    const { error } = await signUp(registerData.email.trim(), registerData.password);
     setIsLoading(false);
     
     if (!error) {
@@ -82,12 +117,17 @@ const Auth = () => {
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    
+    const validation = resetEmailSchema.safeParse({ email: resetEmail });
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+    setIsLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
       redirectTo: `${window.location.origin}/auth?mode=reset-password`,
     });
-
     setIsLoading(false);
 
     if (error) {
