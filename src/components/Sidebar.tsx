@@ -1,4 +1,4 @@
-import { Home, Package, Layers, Building2, Warehouse, ShoppingCart, ArrowLeftRight, Receipt, FileText, FileBarChart, Settings, Users, UserCircle } from "lucide-react";
+import { Home, Package, Layers, Building2, Warehouse, ShoppingCart, ArrowLeftRight, Receipt, FileText, FileBarChart, Settings, Users, UserCircle, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,7 +20,8 @@ const menuItems = [
   { icon: Warehouse, label: "คลังสินค้า", labelEn: "Inventory", path: "/inventory" },
   { icon: ShoppingCart, label: "ซื้อสินค้า", labelEn: "Purchases", path: "/purchases" },
   { icon: ArrowLeftRight, label: "โอนสินค้า", labelEn: "Transfers", path: "/transfers" },
-  { icon: Receipt, label: "ขายสินค้า", labelEn: "Sales", path: "/sales" },
+  { icon: Zap, label: "POS - ขายด่วน", labelEn: "Quick Sale", path: "/pos" },
+  { icon: Receipt, label: "ขายสินค้า (ฝากขาย)", labelEn: "Consignment Sales", path: "/sales" },
   { icon: FileBarChart, label: "รายงานฝากขาย", labelEn: "Consignment Reports", path: "/consignment-reports" },
   { icon: FileText, label: "ใบเสนอราคา", labelEn: "Quotations", path: "/quotations" },
   { icon: Users, label: "ผู้ใช้งาน", labelEn: "Users", path: "/users" },

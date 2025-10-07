@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 export interface Product {
   id: string;
   sku: string;
+  barcode?: string | null;
   name_th: string;
   name_en: string;
   description?: string | null;
@@ -23,6 +24,7 @@ export interface Product {
 
 export interface ProductInput {
   sku: string;
+  barcode?: string;
   name_th: string;
   name_en: string;
   description?: string;

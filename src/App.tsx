@@ -15,6 +15,7 @@ import Inventory from "./pages/Inventory";
 import Purchases from "./pages/Purchases";
 import Transfers from "./pages/Transfers";
 import Sales from "./pages/Sales";
+import POS from "./pages/POS";
 import ConsignmentReports from "./pages/ConsignmentReports";
 import Quotations from "./pages/Quotations";
 import Users from "./pages/Users";
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
           <Route path="/purchases" element={<ProtectedRoute><Purchases /></ProtectedRoute>} />
           <Route path="/transfers" element={<ProtectedRoute><Transfers /></ProtectedRoute>} />
+          <Route path="/pos" element={<ProtectedRoute><POS /></ProtectedRoute>} />
           <Route path="/sales" element={<ProtectedRoute><Sales /></ProtectedRoute>} />
           <Route path="/consignment-reports" element={<ProtectedRoute><ConsignmentReports /></ProtectedRoute>} />
           <Route path="/quotations" element={<ProtectedRoute><Quotations /></ProtectedRoute>} />

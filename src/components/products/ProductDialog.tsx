@@ -38,6 +38,7 @@ const formSchema = z.object({
     .min(1, "กรุณากรอก SKU")
     .max(100, "SKU ต้องไม่เกิน 100 ตัวอักษร")
     .regex(/^[A-Z0-9-]+$/, "SKU ต้องเป็นตัวพิมพ์ใหญ่และตัวเลขเท่านั้น"),
+  barcode: z.string().trim().max(100).optional(),
   name_th: z.string().trim().min(1, "กรุณากรอกชื่อภาษาไทย").max(255),
   name_en: z.string().trim().min(1, "กรุณากรอกชื่อภาษาอังกฤษ").max(255),
   description: z.string().trim().max(1000).optional(),
@@ -74,6 +75,7 @@ export const ProductDialog = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       sku: "",
+      barcode: "",
       name_th: "",
       name_en: "",
       description: "",
@@ -88,6 +90,7 @@ export const ProductDialog = ({
     } else {
       form.reset({
         sku: "",
+        barcode: "",
         name_th: "",
         name_en: "",
         description: "",
@@ -142,6 +145,26 @@ export const ProductDialog = ({
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="barcode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Barcode</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="1234567890123"
+                        {...field}
+                        disabled={submitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="product_type_id"

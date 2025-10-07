@@ -56,8 +56,8 @@ const Sales = () => {
       <div className="px-6 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">ขายสินค้า / Sales</h2>
-            <p className="text-sm text-muted-foreground">บันทึกการขายและออกใบเสร็จ</p>
+            <h2 className="text-2xl font-bold text-foreground">ขายสินค้า - ร้านฝากขาย</h2>
+            <p className="text-sm text-muted-foreground">บันทึกการขายและออกใบเสร็จสำหรับร้านฝากขาย</p>
           </div>
           <Button className="gap-2" onClick={() => setDialogOpen(true)}>
             <Plus className="h-4 w-4" />
