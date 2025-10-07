@@ -18,14 +18,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useBranches } from "@/hooks/useBranches";
 
 const Profile = () => {
   const { user } = useAuth();
   const { data: roles } = useUserRole();
+  const { branches } = useBranches();
   const queryClient = useQueryClient();
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isRoleEditing, setIsRoleEditing] = useState(false);
   const [formData, setFormData] = useState({
     full_name: "",
     phone: "",
@@ -35,6 +45,9 @@ const Profile = () => {
     newPassword: "",
     confirmPassword: "",
   });
+  const [roleFormData, setRoleFormData] = useState<
+    Record<string, { role: string; branch_id: string | null }>
+  >({});
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
@@ -113,6 +126,32 @@ const Profile = () => {
     },
   });
 
+  const updateRolesMutation = useMutation({
+    mutationFn: async (
+      updates: Array<{ id: string; role: string; branch_id: string | null }>
+    ) => {
+      for (const update of updates) {
+        const { error } = await supabase
+          .from("user_roles")
+          .update({
+            role: update.role,
+            branch_id: update.branch_id,
+          })
+          .eq("id", update.id);
+
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-role", user?.id] });
+      toast.success("อัพเดทบทบาทสำเร็จ");
+      setIsRoleEditing(false);
+    },
+    onError: (error: any) => {
+      toast.error("เกิดข้อผิดพลาด: " + error.message);
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateProfileMutation.mutate(formData);
@@ -137,6 +176,96 @@ const Profile = () => {
     });
   };
 
+  const startRoleEditing = () => {
+    if (roles && roles.length > 0) {
+      const initial = roles.reduce(
+        (
+          acc: Record<string, { role: string; branch_id: string | null }>,
+          role: any
+        ) => {
+          acc[role.id] = {
+            role: role.role,
+            branch_id: role.branch_id ?? null,
+          };
+          return acc;
+        },
+        {}
+      );
+
+      setRoleFormData(initial);
+    } else {
+      setRoleFormData({});
+    }
+
+    setIsRoleEditing(true);
+  };
+
+  const handleRoleChange = (roleId: string, newRole: string) => {
+    setRoleFormData((prev) => {
+      const previousBranch = prev[roleId]?.branch_id ?? null;
+      return {
+        ...prev,
+        [roleId]: {
+          role: newRole,
+          branch_id: newRole === "consignment_owner" ? previousBranch : null,
+        },
+      };
+    });
+  };
+
+  const handleBranchChange = (roleId: string, branchId: string | null) => {
+    setRoleFormData((prev) => ({
+      ...prev,
+      [roleId]: {
+        role: prev[roleId]?.role ?? "",
+        branch_id: branchId,
+      },
+    }));
+  };
+
+  const handleSaveRoles = () => {
+    if (!roles || roles.length === 0) return;
+
+    const updates = roles.map((role: any) => {
+      const formValue = roleFormData[role.id] ?? {
+        role: role.role,
+        branch_id: role.branch_id ?? null,
+      };
+
+      return {
+        id: role.id,
+        role: formValue.role,
+        branch_id:
+          formValue.role === "consignment_owner"
+            ? formValue.branch_id ?? null
+            : null,
+      };
+    });
+
+    updateRolesMutation.mutate(updates);
+  };
+
+  const isRoleSaveDisabled =
+    updateRolesMutation.isPending ||
+    !roles ||
+    roles.length === 0 ||
+    roles.some((role: any) => {
+      const formValue = roleFormData[role.id];
+
+      if (!formValue || !formValue.role) {
+        return true;
+      }
+
+      if (
+        formValue.role === "consignment_owner" &&
+        typeof formValue.branch_id === "undefined"
+      ) {
+        return true;
+      }
+
+      return false;
+    });
+
   const getRoleBadge = (role: string) => {
     switch (role) {
       case "admin":
@@ -149,6 +278,23 @@ const Profile = () => {
         return <Badge variant="outline">{role}</Badge>;
     }
   };
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case "admin":
+        return "แอดมิน";
+      case "staff":
+        return "พนักงาน";
+      case "consignment_owner":
+        return "เจ้าของร้านฝาก";
+      default:
+        return role;
+    }
+  };
+
+  const consignmentBranches = branches.filter(
+    (branch) => branch.type === "CONSIGNMENT"
+  );
 
   if (isLoading) {
     return (
@@ -258,31 +404,144 @@ const Profile = () => {
               <div className="space-y-4">
                 <div>
                   <Label className="text-muted-foreground">บทบาทในระบบ</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {roles && roles.length > 0 ? (
-                      roles.map((role: any) => (
-                        <div key={role.id}>{getRoleBadge(role.role)}</div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-muted-foreground">ไม่มีบทบาท</p>
-                    )}
-                  </div>
+                  {!isRoleEditing ? (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {roles && roles.length > 0 ? (
+                        roles.map((role: any) => (
+                          <div key={role.id}>{getRoleBadge(role.role)}</div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">ไม่มีบทบาท</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mt-2 space-y-3">
+                      {roles && roles.length > 0 ? (
+                        roles.map((role: any, index: number) => {
+                          const formValue =
+                            roleFormData[role.id] ?? {
+                              role: role.role,
+                              branch_id: role.branch_id ?? null,
+                            };
+                          const defaultOptions = [
+                            "admin",
+                            "staff",
+                            "consignment_owner",
+                          ];
+                          const selectOptions = Array.from(
+                            new Set([...defaultOptions, formValue.role])
+                          );
+
+                          return (
+                            <div key={role.id} className="space-y-2">
+                              <Label className="text-sm text-muted-foreground">
+                                บทบาทที่ {index + 1}
+                              </Label>
+                              <Select
+                                value={formValue.role}
+                                onValueChange={(value) =>
+                                  handleRoleChange(role.id, value)
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="เลือกบทบาท" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {selectOptions.map((option) => (
+                                    <SelectItem key={option} value={option}>
+                                      {getRoleLabel(option)}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p className="text-sm text-muted-foreground">ไม่มีบทบาท</p>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <Label className="text-muted-foreground">สาขาที่รับผิดชอบ</Label>
-                  <div className="mt-2 space-y-2">
-                    {roles && roles.length > 0 ? (
-                      roles.map((role: any) => (
-                        <div key={role.id} className="flex items-center gap-2">
-                          <Badge variant="outline">
-                            {role.branches?.name_th || "ทั้งหมด"}
-                          </Badge>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-muted-foreground">ไม่มีข้อมูล</p>
-                    )}
-                  </div>
+                  {!isRoleEditing ? (
+                    <div className="mt-2 space-y-2">
+                      {roles && roles.length > 0 ? (
+                        roles.map((role: any) => (
+                          <div key={role.id} className="flex items-center gap-2">
+                            <Badge variant="outline">
+                              {role.branches?.name_th || "ทั้งหมด"}
+                            </Badge>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">ไม่มีข้อมูล</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mt-2 space-y-3">
+                      {roles && roles.length > 0 ? (
+                        roles.map((role: any) => {
+                          const formValue =
+                            roleFormData[role.id] ?? {
+                              role: role.role,
+                              branch_id: role.branch_id ?? null,
+                            };
+
+                          if (formValue.role !== "consignment_owner") {
+                            return (
+                              <div key={role.id} className="space-y-1">
+                                <Label className="text-sm font-medium text-foreground">
+                                  {getRoleLabel(formValue.role)}
+                                </Label>
+                                <p className="text-sm text-muted-foreground">
+                                  บทบาทนี้ไม่จำเป็นต้องเลือกสาขา
+                                </p>
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div key={role.id} className="space-y-2">
+                              <Label className="text-sm font-medium text-foreground">
+                                {getRoleLabel(formValue.role)}
+                              </Label>
+                              {consignmentBranches.length > 0 ? (
+                                <Select
+                                  value={formValue.branch_id ?? "__all__"}
+                                  onValueChange={(value) =>
+                                    handleBranchChange(
+                                      role.id,
+                                      value === "__all__" ? null : value
+                                    )
+                                  }
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="เลือกสาขา" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="__all__">ทั้งหมด</SelectItem>
+                                    {consignmentBranches.map((branch) => (
+                                      <SelectItem key={branch.id} value={branch.id}>
+                                        {branch.name_th}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <p className="text-sm text-muted-foreground">
+                                  ไม่มีสาขาร้านฝากให้เลือก
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p className="text-sm text-muted-foreground">ไม่มีข้อมูล</p>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="pt-4 border-t">
                   <Label className="text-muted-foreground">วันที่สร้างบัญชี</Label>
@@ -296,6 +555,41 @@ const Profile = () => {
                       : "-"}
                   </p>
                 </div>
+                {isRoleEditing ? (
+                  <div className="flex gap-2 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        setIsRoleEditing(false);
+                        setRoleFormData({});
+                      }}
+                    >
+                      ยกเลิก
+                    </Button>
+                    <Button
+                      type="button"
+                      className="flex-1"
+                      onClick={handleSaveRoles}
+                      disabled={isRoleSaveDisabled}
+                    >
+                      {updateRolesMutation.isPending
+                        ? "กำลังบันทึก..."
+                        : "บันทึกบทบาท"}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={startRoleEditing}
+                    disabled={!roles || roles.length === 0}
+                  >
+                    แก้ไขบทบาท
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
