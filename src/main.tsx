@@ -8,8 +8,8 @@ import "./index.css"; // ถ้ามี global styles/Tailwind
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <HashRouter>
+    {/* <HashRouter> */}
       <App />
-    </HashRouter>
+    {/* </HashRouter> */}
   </React.StrictMode>
 );

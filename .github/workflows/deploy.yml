@@ -49,3 +49,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Create 404 for SPA fallback
+        run: cp dist/index.html dist/404.html
+
