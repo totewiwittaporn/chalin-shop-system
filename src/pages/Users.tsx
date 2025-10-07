@@ -17,13 +17,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useIsAdmin } from "@/hooks/useUserRole";
 
 const Users = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteRoleId, setDeleteRoleId] = useState<string | null>(null);
-  
+
   const { data: users, isLoading } = useUsers();
   const deleteRoleMutation = useDeleteUserRole();
+  const isAdmin = useIsAdmin();
 
   const getRoleBadge = (role: string) => {
     switch (role) {
@@ -113,14 +115,23 @@ const Users = () => {
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex justify-end gap-2">
-                              {user.roles.length > 0 && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setDeleteRoleId(user.roles[0].id)}
-                                >
-                                  <Trash2 className="h-4 w-4 text-destructive" />
-                                </Button>
+                              {isAdmin && !user.roles.some(role => role.role === "admin") && (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {/* edit logic here */}}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setDeleteRoleId(user.roles[0].id)}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  </Button>
+                                </>
                               )}
                             </div>
                           </td>
