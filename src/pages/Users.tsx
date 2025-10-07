@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users as UsersIcon, Plus, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useUsers, useDeleteUserRole } from "@/hooks/useUsers";
+import { useUsers, useDeleteUserRole, useDeleteUser } from "@/hooks/useUsers";
 import { UserDialog } from "@/components/users/UserDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -22,9 +22,11 @@ import { useIsAdmin } from "@/hooks/useUserRole";
 const Users = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteRoleId, setDeleteRoleId] = useState<string | null>(null);
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
 
   const { data: users, isLoading } = useUsers();
   const deleteRoleMutation = useDeleteUserRole();
+  const deleteUserMutation = useDeleteUser();
   const isAdmin = useIsAdmin();
 
   const getRoleBadge = (role: string) => {
@@ -44,6 +46,13 @@ const Users = () => {
     if (deleteRoleId) {
       await deleteRoleMutation.mutateAsync(deleteRoleId);
       setDeleteRoleId(null);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (deleteUserId) {
+      await deleteUserMutation.mutateAsync(deleteUserId);
+      setDeleteUserId(null);
     }
   };
 
@@ -116,22 +125,13 @@ const Users = () => {
                           <td className="px-4 py-3">
                             <div className="flex justify-end gap-2">
                               {isAdmin && !user.roles.some(role => role.role === "admin") && (
-                                <>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {/* edit logic here */}}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setDeleteRoleId(user.roles[0].id)}
-                                  >
-                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                  </Button>
-                                </>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setDeleteUserId(user.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
                               )}
                             </div>
                           </td>
@@ -153,17 +153,19 @@ const Users = () => {
 
       <UserDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 
-      <AlertDialog open={!!deleteRoleId} onOpenChange={() => setDeleteRoleId(null)}>
+      <AlertDialog open={!!deleteUserId} onOpenChange={() => setDeleteUserId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>ยืนยันการลบ</AlertDialogTitle>
+            <AlertDialogTitle>ยืนยันการลบผู้ใช้งาน</AlertDialogTitle>
             <AlertDialogDescription>
-              คุณแน่ใจหรือไม่ที่จะลบบทบาทนี้? การกระทำนี้ไม่สามารถย้อนกลับได้
+              คุณแน่ใจหรือไม่ที่จะลบผู้ใช้งานนี้? การกระทำนี้จะลบบัญชี โปรไฟล์ และบทบาททั้งหมด ไม่สามารถย้อนกลับได้
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteRole}>ลบ</AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              ลบผู้ใช้งาน
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
