@@ -33,11 +33,13 @@ const POS = () => {
   const [customerName, setCustomerName] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Auto-focus barcode input
+  // Auto-focus barcode input on desktop only
   useEffect(() => {
-    const input = document.getElementById("barcode-input");
-    if (input) {
-      input.focus();
+    if (window.innerWidth >= 768) {
+      const input = document.getElementById("barcode-input");
+      if (input) {
+        input.focus();
+      }
     }
   }, [cart]);
 
@@ -159,23 +161,23 @@ const POS = () => {
 
   return (
     <MainLayout>
-      <div className="px-6 py-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground">POS - ขายด่วน</h2>
-          <p className="text-sm text-muted-foreground">ระบบขายสินค้าสำหรับร้านสาขา</p>
+      <div className="px-4 md:px-6 py-4 md:py-8">
+        <div className="mb-4 md:mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground">POS - ขายด่วน</h2>
+          <p className="text-xs md:text-sm text-muted-foreground">ระบบขายสินค้าสำหรับร้านสาขา</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Left: Product Selection */}
           <div className="lg:col-span-2 space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>สแกนหรือเลือกสินค้า</CardTitle>
+                <CardTitle className="text-base md:text-lg">สแกนหรือเลือกสินค้า</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <Label htmlFor="barcode-input">Barcode</Label>
+                    <Label htmlFor="barcode-input" className="text-sm">Barcode</Label>
                     <Input
                       id="barcode-input"
                       placeholder="สแกนหรือพิมพ์ barcode..."
@@ -202,7 +204,7 @@ const POS = () => {
                 </div>
 
                 <div>
-                  <Label>หรือเลือกจากรายการ</Label>
+                  <Label className="text-sm">หรือเลือกจากรายการ</Label>
                   <Select
                     onValueChange={(productId) => {
                       const product = products?.find(p => p.id === productId);
@@ -229,8 +231,8 @@ const POS = () => {
             {/* Cart Items */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingCart className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                  <ShoppingCart className="h-4 w-4 md:h-5 md:w-5" />
                   รายการสินค้า ({cart.length})
                 </CardTitle>
               </CardHeader>
@@ -238,36 +240,37 @@ const POS = () => {
                 {cart.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <ShoppingCart className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>ยังไม่มีสินค้าในตะกร้า</p>
+                    <p className="text-sm">ยังไม่มีสินค้าในตะกร้า</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {cart.map((item) => (
                       <div
                         key={item.product_id}
-                        className="flex items-center gap-3 p-3 border rounded-lg"
+                        className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 border rounded-lg"
                       >
-                        <div className="flex-1">
-                          <p className="font-medium">{item.product_name}</p>
-                          <p className="text-sm text-muted-foreground">{item.product_sku}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm md:text-base truncate">{item.product_name}</p>
+                          <p className="text-xs md:text-sm text-muted-foreground">{item.product_sku}</p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 justify-between sm:justify-end">
                           <Input
                             type="number"
                             value={item.quantity}
                             onChange={(e) =>
                               updateQuantity(item.product_id, parseInt(e.target.value) || 0)
                             }
-                            className="w-20 text-center"
+                            className="w-16 text-center text-sm"
                             min="1"
                           />
-                          <span className="w-24 text-right font-medium">
+                          <span className="w-20 text-right font-medium text-sm md:text-base">
                             ฿{(item.quantity * item.unit_price).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                           </span>
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => removeFromCart(item.product_id)}
+                            className="h-8 w-8"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -284,11 +287,11 @@ const POS = () => {
           <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>ข้อมูลการขาย</CardTitle>
+                <CardTitle className="text-base md:text-lg">ข้อมูลการขาย</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="branch">สาขา *</Label>
+                  <Label htmlFor="branch" className="text-sm">สาขา *</Label>
                   <Select value={branchId} onValueChange={setBranchId}>
                     <SelectTrigger>
                       <SelectValue placeholder="เลือกสาขา" />
@@ -304,7 +307,7 @@ const POS = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="customer">ชื่อลูกค้า (ไม่บังคับ)</Label>
+                  <Label htmlFor="customer" className="text-sm">ชื่อลูกค้า (ไม่บังคับ)</Label>
                   <Input
                     id="customer"
                     placeholder="ชื่อลูกค้า..."
@@ -314,7 +317,7 @@ const POS = () => {
                 </div>
 
                 <div className="border-t pt-4 space-y-2">
-                  <div className="flex justify-between text-lg font-bold">
+                  <div className="flex justify-between text-base md:text-lg font-bold">
                     <span>ยอดรวมทั้งหมด</span>
                     <span>฿{calculateTotal().toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
                   </div>
