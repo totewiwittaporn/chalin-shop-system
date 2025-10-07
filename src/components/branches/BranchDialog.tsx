@@ -324,7 +324,7 @@ export const BranchDialog = ({
               )}
             />
 
-            {form.watch("type") === "CONSIGNMENT" && (
+            {(form.watch("type") === "CONSIGNMENT" || form.watch("type") === "BRANCH") && (
               <FormField
                 control={form.control}
                 name="commission_rate"
