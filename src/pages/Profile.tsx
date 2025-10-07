@@ -11,12 +11,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import {
   Select,
@@ -32,10 +36,12 @@ const Profile = () => {
   const { data: roles } = useUserRole();
   const { branches } = useBranches();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isRoleEditing, setIsRoleEditing] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     full_name: "",
     phone: "",
@@ -146,6 +152,40 @@ const Profile = () => {
       queryClient.invalidateQueries({ queryKey: ["user-role", user?.id] });
       toast.success("อัพเดทบทบาทสำเร็จ");
       setIsRoleEditing(false);
+    },
+    onError: (error: any) => {
+      toast.error("เกิดข้อผิดพลาด: " + error.message);
+    },
+  });
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      if (!user?.id) throw new Error("No user");
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error("No active session");
+      }
+
+      const { data, error } = await supabase.functions.invoke("delete-user", {
+        body: { userId: user.id },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      await supabase.auth.signOut();
+    },
+    onSuccess: () => {
+      toast.success("ลบบัญชีสำเร็จ");
+      setIsDeleteDialogOpen(false);
+      navigate("/auth");
     },
     onError: (error: any) => {
       toast.error("เกิดข้อผิดพลาด: " + error.message);
@@ -614,6 +654,13 @@ const Profile = () => {
                 >
                   เปลี่ยนรหัสผ่าน
                 </Button>
+                <Button
+                  variant="destructive"
+                  className="w-full"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                >
+                  ลบบัญชี
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -683,6 +730,29 @@ const Profile = () => {
               </Button>
             </div>
           </form>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ยืนยันการลบบัญชี</AlertDialogTitle>
+            <AlertDialogDescription>
+              การลบบัญชีจะไม่สามารถกู้คืนได้ คุณต้องการดำเนินการต่อหรือไม่?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteAccountMutation.isPending}>
+              ยกเลิก
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteAccountMutation.mutate()}
+              disabled={deleteAccountMutation.isPending}
+            >
+              {deleteAccountMutation.isPending ? "กำลังลบ..." : "ยืนยันการลบ"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </MainLayout>
