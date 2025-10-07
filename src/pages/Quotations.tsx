@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { FileText, Plus, Eye, Send, CheckCircle, XCircle, Search, Edit } from "lucide-react";
 import { QuotationDialog } from "@/components/quotations/QuotationDialog";
+import { ViewQuotationDialog } from "@/components/quotations/ViewQuotationDialog";
 import { useQuotations } from "@/hooks/useQuotations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, isAfter } from "date-fns";
@@ -15,6 +16,7 @@ const Quotations = () => {
   const { quotations, isLoading, createQuotation, updateQuotation, sendQuotation, acceptQuotation, rejectQuotation } = useQuotations();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingQuotation, setEditingQuotation] = useState<any>(null);
+  const [viewingQuotation, setViewingQuotation] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
@@ -196,7 +198,12 @@ const Quotations = () => {
                                 แปลงเป็นใบขาย
                               </Button>
                             )}
-                            <Button variant="ghost" size="sm">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setViewingQuotation(quotation)}
+                              title="ดูรายละเอียด"
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
                           </div>
@@ -224,6 +231,12 @@ const Quotations = () => {
         }}
         onSubmit={handleSubmit}
         editingQuotation={editingQuotation}
+      />
+
+      <ViewQuotationDialog
+        open={!!viewingQuotation}
+        onOpenChange={(open) => !open && setViewingQuotation(null)}
+        quotation={viewingQuotation}
       />
 
       <AlertDialog open={!!sendingId} onOpenChange={() => setSendingId(null)}>

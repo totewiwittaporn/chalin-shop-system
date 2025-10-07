@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Receipt, Plus, FileText, Search, TrendingUp } from "lucide-react";
 import { SaleDialog } from "@/components/sales/SaleDialog";
+import { ViewSaleDialog } from "@/components/sales/ViewSaleDialog";
 import { useSales } from "@/hooks/useSales";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -14,6 +15,7 @@ import { format } from "date-fns";
 const Sales = () => {
   const { sales, isLoading, createSale, cancelSale } = useSales();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [viewingSale, setViewingSale] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [cancellingId, setCancellingId] = useState<string | null>(null);
 
@@ -178,7 +180,13 @@ const Sales = () => {
                             <td className="px-3 md:px-4 py-3">{getStatusBadge(sale.status)}</td>
                             <td className="px-3 md:px-4 py-3">
                               <div className="flex justify-end gap-1 md:gap-2">
-                                <Button variant="ghost" size="sm" title="ดูรายละเอียด" className="h-8 w-8 p-0">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => setViewingSale(sale)}
+                                  title="ดูรายละเอียด" 
+                                  className="h-8 w-8 p-0"
+                                >
                                   <FileText className="h-4 w-4" />
                                 </Button>
                                 {sale.status === "COMPLETED" && (
@@ -214,6 +222,12 @@ const Sales = () => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSubmit={createSale}
+      />
+
+      <ViewSaleDialog
+        open={!!viewingSale}
+        onOpenChange={(open) => !open && setViewingSale(null)}
+        sale={viewingSale}
       />
 
       <AlertDialog open={!!cancellingId} onOpenChange={() => setCancellingId(null)}>

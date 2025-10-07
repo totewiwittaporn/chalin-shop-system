@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ArrowLeftRight, Plus, FileText, Search, CheckCircle, Package } from "lucide-react";
 import { TransferDialog } from "@/components/transfers/TransferDialog";
+import { ViewTransferDialog } from "@/components/transfers/ViewTransferDialog";
 import { useTransfers } from "@/hooks/useTransfers";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -14,6 +15,7 @@ import { format } from "date-fns";
 const Transfers = () => {
   const { transfers, isLoading, createTransfer, approveTransfer, receiveTransfer, cancelTransfer } = useTransfers();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [viewingTransfer, setViewingTransfer] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [receivingId, setReceivingId] = useState<string | null>(null);
@@ -126,7 +128,12 @@ const Transfers = () => {
                         <td className="px-4 py-3">{getStatusBadge(transfer.status)}</td>
                         <td className="px-4 py-3">
                           <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="sm" title="ดูรายละเอียด">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => setViewingTransfer(transfer)}
+                              title="ดูรายละเอียด"
+                            >
                               <FileText className="h-4 w-4" />
                             </Button>
                             {transfer.status === "PENDING" && (
@@ -179,6 +186,12 @@ const Transfers = () => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSubmit={createTransfer}
+      />
+
+      <ViewTransferDialog
+        open={!!viewingTransfer}
+        onOpenChange={(open) => !open && setViewingTransfer(null)}
+        transfer={viewingTransfer}
       />
 
       <AlertDialog open={!!approvingId} onOpenChange={() => setApprovingId(null)}>
