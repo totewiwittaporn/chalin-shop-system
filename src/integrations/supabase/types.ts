@@ -64,6 +64,7 @@ export type Database = {
           address_en: string | null
           address_th: string | null
           code: string
+          commission_rate: number | null
           company_name_en: string | null
           company_name_th: string | null
           created_at: string | null
@@ -86,6 +87,7 @@ export type Database = {
           address_en?: string | null
           address_th?: string | null
           code: string
+          commission_rate?: number | null
           company_name_en?: string | null
           company_name_th?: string | null
           created_at?: string | null
@@ -108,6 +110,7 @@ export type Database = {
           address_en?: string | null
           address_th?: string | null
           code?: string
+          commission_rate?: number | null
           company_name_en?: string | null
           company_name_th?: string | null
           created_at?: string | null

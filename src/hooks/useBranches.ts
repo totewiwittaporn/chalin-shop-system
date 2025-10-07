@@ -14,6 +14,7 @@ export interface Branch {
   company_name_th?: string | null;
   company_name_en?: string | null;
   tax_id?: string | null;
+  commission_rate?: number | null;
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -30,6 +31,7 @@ export interface BranchInput {
   company_name_th?: string;
   company_name_en?: string;
   tax_id?: string;
+  commission_rate?: number;
 }
 
 export const useBranches = () => {

@@ -48,6 +48,11 @@ const formSchema = z.object({
   company_name_th: z.string().trim().max(255).optional(),
   company_name_en: z.string().trim().max(255).optional(),
   tax_id: z.string().trim().max(50).optional(),
+  commission_rate: z
+    .number()
+    .min(0, "ค่าคอมมิชชั่นต้องไม่ต่ำกว่า 0%")
+    .max(100, "ค่าคอมมิชชั่นต้องไม่เกิน 100%")
+    .optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -82,6 +87,7 @@ export const BranchDialog = ({
       company_name_th: "",
       company_name_en: "",
       tax_id: "",
+      commission_rate: 15,
     },
   });
 
@@ -100,6 +106,7 @@ export const BranchDialog = ({
         company_name_th: "",
         company_name_en: "",
         tax_id: "",
+        commission_rate: 15,
       });
     }
   }, [initialData, form, open]);
@@ -316,6 +323,32 @@ export const BranchDialog = ({
                 </FormItem>
               )}
             />
+
+            {form.watch("type") === "CONSIGNMENT" && (
+              <FormField
+                control={form.control}
+                name="commission_rate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ค่าคอมมิชชั่น (%)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="15"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                        disabled={submitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <DialogFooter>
               <Button

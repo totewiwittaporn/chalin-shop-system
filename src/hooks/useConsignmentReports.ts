@@ -94,10 +94,10 @@ export function useConsignmentReports(startDate?: Date, endDate?: Date) {
   const { data: consignmentSales, isLoading: isLoadingSales } = useQuery({
     queryKey: ["consignment-sales", startDate, endDate],
     queryFn: async () => {
-      // Get all consignment branches
+      // Get all consignment branches with commission rates
       const { data: branches, error: branchError } = await supabase
         .from("branches")
-        .select("id, code, name_th, type")
+        .select("id, code, name_th, type, commission_rate")
         .eq("type", "CONSIGNMENT")
         .eq("is_active", true);
 
@@ -143,8 +143,9 @@ export function useConsignmentReports(startDate?: Date, endDate?: Date) {
         const totalCost = sale.sale_items?.reduce((sum: number, item: any) => sum + item.total_cost, 0) || 0;
         const profit = sale.total_amount - totalCost;
         
-        // Default commission rate: 15% (can be customized per branch)
-        const commissionRate = 0.15;
+        // Get commission rate from branch (stored as percentage 0-100, convert to decimal)
+        const branch = branches?.find(b => b.id === sale.branch_id);
+        const commissionRate = (branch?.commission_rate ?? 15) / 100;
         const commissionAmount = profit * commissionRate;
 
         return {
